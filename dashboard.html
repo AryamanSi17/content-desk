@@ -1,0 +1,802 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Content Desk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f6f5f2;--bg2:#ffffff;--glass:#ffffff;--glass2:#f1efea;--line:#e6e4df;--line2:#d9d6cf;
+  --ink:#16161a;--mute:#6b6b76;--dim:#9a9aa6;
+  --a1:#d9480f;--a2:#d9480f;--a3:#d9480f;--grad:#d9480f;
+  --good:#2b8a3e;--warn:#b7791f;--bad:#c92a2a;--glow:0 1px 2px rgba(0,0,0,.06),0 4px 14px rgba(217,72,15,.18);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f0f12;--bg2:#17171c;--glass:#17171c;--glass2:#22222a;--line:#2a2a32;--line2:#3a3a44;
+  --ink:#ececf1;--mute:#9a9aa6;--dim:#6b6b76;--a1:#ff6b2c;--a2:#ff6b2c;--a3:#ff6b2c;--grad:#ff6b2c;--glow:0 4px 18px rgba(255,107,44,.25)}}
+:root[data-theme="dark"]{
+  --bg:#0f0f12;--bg2:#17171c;--glass:#17171c;--glass2:#22222a;--line:#2a2a32;--line2:#3a3a44;
+  --ink:#ececf1;--mute:#9a9aa6;--dim:#6b6b76;--a1:#ff6b2c;--a2:#ff6b2c;--a3:#ff6b2c;--grad:#ff6b2c;--glow:0 4px 18px rgba(255,107,44,.25)}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 Inter,system-ui,sans-serif;display:flex;flex-direction:column;overflow:hidden}
+nav,main{position:relative;z-index:1}
+a{color:inherit}
+::selection{background:rgba(217,72,15,.25)}
+::-webkit-scrollbar{width:10px;height:10px}::-webkit-scrollbar-thumb{background:var(--line2);border-radius:10px;border:3px solid transparent;background-clip:padding-box}
+button,select,input{font:inherit;color:var(--ink)}
+.btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line2);background:var(--glass);border-radius:12px;padding:8px 14px;font-weight:600;font-size:14px;cursor:pointer;transition:.15s;text-decoration:none;white-space:nowrap}
+.btn:hover{background:var(--glass2);border-color:var(--line2);transform:translateY(-1px)}
+.btn:disabled{opacity:.5;cursor:wait;transform:none}
+.btn.hot{background:var(--grad);border:0;color:#fff;box-shadow:var(--glow)}
+.btn.hot:hover{filter:brightness(1.08)}
+.btn.ok{background:rgba(61,220,132,.14);border-color:rgba(61,220,132,.5);color:var(--good)}
+.btn.sm{padding:6px 11px;font-size:13px;border-radius:10px}
+.btn svg{width:16px;height:16px}
+select,input{background:var(--glass);border:1px solid var(--line2);border-radius:12px;padding:8px 12px}
+select option{background:var(--bg2)}
+input:focus,select:focus{outline:2px solid var(--a2);outline-offset:1px}
+
+/* ---------- nav ---------- */
+nav{display:flex;align-items:center;gap:18px;padding:12px 22px;border-bottom:1px solid var(--line);background:var(--bg2);flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;font:700 18px "Space Grotesk",sans-serif;letter-spacing:-.02em;white-space:nowrap}
+.logo{width:30px;height:30px;border-radius:9px;background:var(--grad);display:grid;place-items:center;box-shadow:var(--glow)}
+.logo svg{width:16px;height:16px;color:#fff}
+.credit{margin:32px auto 24px;text-align:center;font:500 12px Inter;color:var(--mute)}
+.credit a{color:var(--ink);text-decoration:none;font-weight:600}
+.credit a:hover{text-decoration:underline}
+.brand small{display:block;font:500 11px Inter;color:var(--mute);letter-spacing:0}
+.tabs{position:relative;display:flex;gap:2px;padding:4px;border:1px solid var(--line);border-radius:14px;background:var(--glass)}
+.tabs a{position:relative;z-index:1;text-decoration:none;padding:7px 14px;border-radius:10px;font-weight:600;font-size:13.5px;color:var(--mute);transition:color .2s;white-space:nowrap}
+.tabs a.on{color:var(--ink)}
+.tabs .pill{position:absolute;z-index:0;top:4px;bottom:4px;border-radius:10px;background:var(--glass2);border:1px solid var(--line2);transition:left .25s cubic-bezier(.3,.7,.2,1),width .25s cubic-bezier(.3,.7,.2,1)}
+.tools{margin-left:auto;display:flex;gap:8px;align-items:center}
+.status{font-size:12px;color:var(--mute);white-space:nowrap;display:flex;align-items:center;gap:6px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--good);box-shadow:0 0 10px var(--good)}
+.dot.run{background:var(--a2);box-shadow:0 0 10px var(--a2);animation:pulse 1s infinite}
+@keyframes pulse{50%{opacity:.35}}
+#run.running{animation:pulse 1.2s infinite}
+@keyframes shimmer{to{background-position:-200% 0}}
+
+/* ---------- layout ---------- */
+main{flex:1;min-height:0;display:flex}
+.view{display:none;flex:1;min-height:0;overflow:auto;padding:24px}
+.view.on{display:block;animation:fade .25s ease}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}}
+.inner{max-width:1120px;margin:0 auto}
+.card{background:var(--glass);border:1px solid var(--line);border-radius:18px;padding:18px;backdrop-filter:blur(10px)}
+.eyebrow{font:600 11px Inter;text-transform:uppercase;letter-spacing:.12em;color:var(--mute);margin:0 0 10px}
+.mute{color:var(--mute)}.small{font-size:13px}
+.chip{display:inline-flex;align-items:center;gap:5px;background:var(--glass2);border:1px solid var(--line);border-radius:999px;padding:2px 9px;font-size:11.5px;font-weight:600;white-space:nowrap;color:var(--mute)}
+.chip.ok::before,.chip.failed::before,.chip.empty::before{content:"";width:6px;height:6px;border-radius:50%}
+.chip.ok::before{background:var(--good);box-shadow:0 0 6px var(--good)}.chip.failed::before{background:var(--bad)}.chip.empty::before{background:var(--warn)}
+.grad-text{color:var(--a2)}
+
+/* ---------- ideas ---------- */
+#v-ideas.on{display:flex;padding:0}
+.list{width:360px;flex-shrink:0;border-right:1px solid var(--line);overflow:auto;padding:14px 12px;overscroll-behavior:contain}
+.list .head{padding:4px 6px 12px}
+.list{position:relative;transition:width .2s}
+.fold{position:absolute;top:12px;right:10px;z-index:2;padding:4px 10px}
+#v-ideas.folded .list{width:84px;padding:52px 8px 14px}
+#v-ideas.folded .list .head,#v-ideas.folded .item .chk,#v-ideas.folded .item .thumb,#v-ideas.folded .item .txt{display:none}
+#v-ideas.folded .item{justify-content:center;padding:8px 0}
+#pdfView{width:min(1000px,94vw);height:92vh;padding:0;border:1px solid var(--line);border-radius:16px;background:var(--bg2);color:var(--ink);overflow:hidden}
+#pdfView[open]{display:flex;flex-direction:column}
+#pdfView::backdrop{background:rgba(0,0,0,.6)}
+.pv-bar{display:flex;gap:10px;align-items:center;padding:10px 12px;border-bottom:1px solid var(--line)}
+.pv-bar b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#pvFrame{flex:1;width:100%;border:0;background:#000}
+.badge{font-size:11px;color:var(--a2);font-weight:600}
+.list .head b{font:700 22px "Space Grotesk";letter-spacing:-.02em}
+.banner{border:1px solid var(--line2);background:var(--glass);border-radius:12px;padding:9px 12px;margin-top:10px;font-size:12.5px;color:var(--mute)}
+.banner b{color:var(--ink)}
+.banner.stale{border-color:rgba(255,84,104,.5)}
+.item{display:flex;gap:12px;padding:11px;border-radius:14px;cursor:pointer;align-items:center;border:1px solid transparent;transition:.15s;margin-bottom:4px}
+.item:hover{background:var(--glass)}
+.item.sel{background:var(--glass2);border-color:var(--line2);box-shadow:inset 3px 0 0 var(--a2)}
+.ring{--p:50;width:42px;height:42px;border-radius:50%;flex-shrink:0;display:grid;place-items:center;background:conic-gradient(var(--a2) calc(var(--p)*1%),var(--line) 0)}
+.ring span{width:34px;height:34px;border-radius:50%;background:var(--bg2);display:grid;place-items:center;font:700 14px "Space Grotesk"}
+.thumb{width:44px;height:44px;border-radius:10px;flex-shrink:0;background:var(--glass2) center/cover;border:1px solid var(--line)}
+.item .t{font-weight:600;font-size:13.5px;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.item .m{font-size:11.5px;color:var(--dim);margin-top:3px}
+.item.done .t{color:var(--dim);text-decoration:line-through}
+.chk{width:24px;height:24px;border-radius:50%;flex-shrink:0;border:2px solid var(--line2);background:transparent;display:grid;place-items:center;cursor:pointer;color:transparent;font-size:13px;font-weight:800;transition:.15s;padding:0}
+.chk:hover{border-color:var(--good);color:var(--good)}
+.item.isposted .chk{background:var(--good);border-color:var(--good);color:#fff}
+.item.isposted{opacity:.55}
+.item.leaving{opacity:0;transform:translateX(-20px);transition:.3s}
+.listbar{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--mute);margin-top:8px}
+.listbar button{background:none;border:0;color:var(--a2);font-weight:600;cursor:pointer;font-size:12px;padding:0}
+.toast button{background:none;border:0;color:var(--a2);font-weight:700;cursor:pointer;margin-left:6px;font-size:14px}
+.alldone{padding:40px 14px;text-align:center;color:var(--mute)}
+.item .tick{color:var(--good);font-weight:700}
+
+.detail{flex:1;min-width:0;overflow:hidden;padding:0 0 0 30px}
+.dgrid{display:grid;grid-template-columns:250px 1fr;gap:30px;max-width:1110px;height:100%}
+.dgrid>.left{overflow:auto;padding:26px 0 26px;scrollbar-width:none}
+.dgrid>.right{overflow:auto;padding:26px 30px 60px 0;overscroll-behavior:contain}
+.phone{position:relative;border-radius:30px;padding:8px;background:#1b1b22;box-shadow:0 20px 40px -20px rgba(0,0,0,.45)}
+.screen{position:relative;border-radius:23px;overflow:hidden;aspect-ratio:9/16;background:linear-gradient(160deg,#1b1b22,#2d1a12) center/cover;color:#fff;display:flex;flex-direction:column;justify-content:space-between;padding:22px 14px 14px}
+.screen::before{content:"";position:absolute;top:8px;left:50%;transform:translateX(-50%);width:70px;height:18px;border-radius:12px;background:#000}
+.screen .txt{font:700 25px/1.05 "Space Grotesk";text-transform:uppercase;letter-spacing:-.02em;text-shadow:0 2px 20px rgba(0,0,0,.6)}
+.screen .txt mark{background:var(--grad);color:#fff;padding:0 4px;border-radius:4px;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.screen .kw{font:500 11.5px "JetBrains Mono";background:rgba(0,0,0,.45);backdrop-filter:blur(6px);padding:7px 9px;border-radius:9px;border:1px solid rgba(255,255,255,.15)}
+.screen .top{display:flex;justify-content:space-between;align-items:center;font-size:11px;font-weight:600;opacity:.9}
+.side{position:absolute;right:10px;bottom:70px;display:grid;gap:12px;font-size:16px;opacity:.85;text-align:center}
+.shots{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
+.shots a{display:block;border-radius:12px;overflow:hidden;border:1px solid var(--line2);aspect-ratio:1;position:relative;background:var(--glass2)}
+.shots img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s}
+.shots a:hover img{transform:scale(1.06)}
+.shots span{position:absolute;inset:auto 0 0 0;font-size:9.5px;font-weight:700;padding:3px 5px;background:linear-gradient(transparent,rgba(0,0,0,.85));color:#fff}
+.meta{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+.title-row{display:flex;gap:14px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap}
+.detail h3{flex:1;min-width:260px;margin:0;font:700 30px/1.12 "Space Grotesk";letter-spacing:-.03em}
+.why{margin:14px 0 22px;padding:13px 15px;border-radius:14px;background:var(--glass);border:1px solid var(--line);font-size:14px;color:var(--mute)}
+.why b{color:var(--ink)}
+.steps{position:relative;display:grid;gap:12px}
+.steps::before{content:"";position:absolute;left:15px;top:10px;bottom:10px;width:2px;background:var(--line2);border-radius:2px}
+.step{position:relative;display:grid;grid-template-columns:32px 1fr;gap:14px}
+.num{width:32px;height:32px;border-radius:50%;background:var(--bg2);border:2px solid var(--a2);display:grid;place-items:center;font:700 13px "Space Grotesk";z-index:1}
+.step:first-child .num{background:var(--grad);border:0;color:#fff;box-shadow:var(--glow)}
+.sbody{background:var(--glass);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.part{font:600 11px Inter;text-transform:uppercase;letter-spacing:.1em;color:var(--a2);margin-bottom:4px}
+.say{font-size:16px;font-weight:500;line-height:1.5}
+.show{margin-top:8px;font-size:12.5px;color:var(--mute);display:flex;gap:7px;align-items:flex-start}
+.show svg{width:14px;height:14px;flex-shrink:0;margin-top:2px;opacity:.7}
+.cap{margin-top:22px;border:1px dashed var(--line2);border-radius:14px;padding:14px;font-size:13.5px;white-space:pre-wrap}
+.cap .tags{color:var(--a2);font-weight:600}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:14px}
+.links{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.links a{font-size:12px;color:var(--mute);text-decoration:none;border:1px solid var(--line);padding:4px 10px;border-radius:999px}
+.links a:hover{color:var(--ink);border-color:var(--line2)}
+
+/* ---------- other tabs ---------- */
+.hero{padding:22px;margin-bottom:16px;border-color:var(--line2)}
+.hero .big{font:700 22px/1.3 "Space Grotesk";letter-spacing:-.02em}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.feed{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.feed li{padding:12px 14px;border-radius:14px;background:var(--glass);border:1px solid var(--line);transition:.15s}
+.feed li:hover{border-color:var(--line2)}
+.feed a{font-weight:600;text-decoration:none}
+.feed a:hover{text-decoration:underline}
+.feed .hook{font-size:13px;margin-top:6px}
+.feed .why2{font-size:12.5px;color:var(--mute);margin-top:4px}
+.log{font:12px/1.5 "JetBrains Mono";white-space:pre-wrap;max-height:360px;overflow:auto;background:var(--glass2);border:1px solid var(--line);border-radius:14px;padding:12px}
+
+.sprint{display:grid;grid-template-columns:repeat(10,1fr);gap:8px;margin:14px 0 18px}
+.day{height:56px;border-radius:14px;background:var(--glass);border:1px solid var(--line);display:grid;place-items:center;font:700 16px "Space Grotesk";color:var(--dim);position:relative}
+.day.today{border:2px solid var(--a2);color:var(--ink);box-shadow:var(--glow)}
+.day.hit{background:var(--grad);color:#fff;border:0}
+.day small{position:absolute;bottom:4px;font:600 9px Inter;opacity:.85}
+.plan{counter-reset:p;list-style:none;padding:0;margin:0;display:grid;gap:8px}
+.plan li{counter-increment:p;display:grid;grid-template-columns:34px 1fr;gap:10px;align-items:start;font-size:13.5px;color:var(--mute);padding:8px 10px;border-radius:12px}
+.plan li::before{content:counter(p);font:700 13px "Space Grotesk";width:26px;height:26px;border-radius:8px;background:var(--glass2);display:grid;place-items:center;color:var(--ink)}
+.plan li.cur{background:var(--glass2);color:var(--ink);border:1px solid var(--line2)}
+.plan li.cur::before{background:var(--grad);color:#fff}
+.rules{display:grid;grid-template-columns:1fr 1fr;gap:10px;list-style:none;margin:0;padding:0}
+.rules li{padding:12px 14px;border-radius:14px;background:var(--glass);border:1px solid var(--line);font-size:13.5px}
+.rules li b{display:block;font:700 20px "Space Grotesk";margin-bottom:2px}
+.bd p{margin:0 0 10px}.bd ol{margin:0 0 12px;padding-left:20px}
+.statgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.stat{padding:14px;border-radius:14px;background:var(--glass);border:1px solid var(--line)}
+.stat b{display:block;font:700 26px "Space Grotesk"}
+.stat span{font-size:12px;color:var(--mute);display:flex;align-items:center;gap:6px}
+.empty{padding:80px 20px;text-align:center;color:var(--mute)}
+/* v2 */
+.panel{margin:0 0 18px;padding:14px;border-radius:14px;border:1px solid var(--line2);background:var(--glass)}
+.panel .eyebrow{display:flex;justify-content:space-between;align-items:center}
+.hooks{display:grid;gap:8px}
+.hookpick{display:flex;gap:8px;margin-bottom:10px}.hookpick select{flex:1;min-width:0}
+.hk{display:block;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:var(--bg2)}
+.hk.on{border-color:var(--a2);box-shadow:var(--glow)}
+.hk .ty{font:600 10.5px Inter;text-transform:uppercase;letter-spacing:.1em;color:var(--a2)}
+.hk .sy{font-weight:500;font-size:14.5px;margin:2px 0}
+.hk .wy{font-size:12px;color:var(--mute)}
+.guide{white-space:pre-wrap;font-size:13.5px;line-height:1.55;max-height:340px;overflow:auto;background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:12px}
+.posted{color:var(--good);font-weight:700}
+.radar{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 16px}
+.rd{padding:8px 12px;border-radius:12px;border:1px solid var(--line2);background:var(--glass);font-size:13px}
+.rd b{display:block;font-size:14px}
+.rd .heat{letter-spacing:1px}
+table.res{width:100%;border-collapse:collapse;font-size:13.5px}
+table.res th{font:600 11px Inter;text-transform:uppercase;letter-spacing:.08em;color:var(--mute);text-align:left;padding:8px;border-bottom:1px solid var(--line2)}
+table.res td{padding:9px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
+table.res td.n{font:600 14px "Space Grotesk";white-space:nowrap}
+.bar{height:6px;border-radius:4px;background:var(--a2);min-width:2px}
+.up{color:var(--good);font-size:11.5px;font-weight:700}
+.gcard{margin-bottom:12px}
+.gcard .kw{font:600 12px "JetBrains Mono";color:var(--a2)}
+.hint{position:fixed;right:14px;bottom:10px;font-size:11px;color:var(--dim);z-index:2;background:var(--bg);padding:3px 8px;border-radius:8px;border:1px solid var(--line)}
+.hint kbd{font:600 10.5px "JetBrains Mono";border:1px solid var(--line2);border-radius:4px;padding:0 4px;margin:0 1px}
+.back{display:none}
+
+/* ---------- toast + teleprompter ---------- */
+.toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,30px);opacity:0;z-index:50;background:var(--bg2);border:1px solid var(--line2);padding:10px 16px;border-radius:12px;font-weight:600;font-size:14px;box-shadow:0 12px 40px rgba(0,0,0,.5);transition:.25s;display:flex;gap:8px;align-items:center}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.toast i{width:18px;height:18px;border-radius:50%;background:var(--good);display:grid;place-items:center;color:#000;font-style:normal;font-size:11px}
+#prompter{position:fixed;inset:0;z-index:40;background:#000;display:none;flex-direction:column}
+#prompter.on{display:flex}
+#prompter .bar{display:flex;gap:10px;align-items:center;padding:14px 20px;color:#999;font-size:13px;border-bottom:1px solid #222}
+#prompter .bar .btn{color:#fff}
+#ptext{flex:1;overflow:auto;padding:30vh 12vw 60vh;font:600 clamp(28px,4.2vw,56px)/1.35 Inter;color:#fff;scroll-behavior:auto}
+#ptext p{margin:0 0 .9em}
+#ptext p span{display:block;font:600 13px Inter;letter-spacing:.14em;text-transform:uppercase;color:var(--a2);margin-bottom:6px}
+#prompter .guide{position:fixed;left:0;right:0;top:34vh;height:2px;background:var(--grad);opacity:.6;pointer-events:none}
+
+@media (max-width:980px){.dgrid{grid-template-columns:200px 1fr;gap:20px}.statgrid{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:860px){
+  body{overflow:auto}
+  nav{padding:10px 16px;gap:10px}
+  .tabs{order:3;width:100%;overflow-x:auto}
+  .tools{margin-left:auto}
+  .status{display:none}
+  .list{width:100%;border-right:0}
+  .fold{display:none}
+  .detail{display:none;padding:18px 16px 60px;overflow:visible}
+  .dgrid{height:auto}.dgrid>.left,.dgrid>.right{overflow:visible;padding:0}
+  #v-ideas.show-detail .list{display:none}
+  #v-ideas.show-detail .detail{display:block}
+  .back{display:inline-flex;margin-bottom:14px}
+  .dgrid,.cols,.rules{grid-template-columns:1fr}
+  .phone{max-width:240px;margin:0 auto}
+  .sprint{grid-template-columns:repeat(5,1fr)}
+  .view{padding:16px}
+  .detail h3{font-size:24px}
+}
+</style>
+</head>
+<body>
+<nav>
+  <div class="brand"><div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg></div><div>Content Desk<small>@your_handle</small></div></div>
+  <div class="tabs" id="tabs">
+    <span class="pill" id="pill"></span>
+    <a href="#ideas">Ideas</a>
+    <a href="#news">Today's news</a>
+    <a href="#competitors">Competitor breakdown</a>
+    <a href="#sprint">Sprint &amp; playbook</a>
+    <a href="#results">Results</a>
+    <a href="#guides">Guides</a>
+    <a href="#runs">Sources &amp; runs</a>
+  </div>
+  <div class="tools">
+    <span class="status" id="status"></span>
+    <select id="date" aria-label="Digest date"></select>
+    <button id="run" class="btn hot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg><span>Run now</span></button>
+    <button id="theme" class="btn" aria-label="Toggle theme">◐</button>
+  </div>
+</nav>
+
+<main>
+  <section class="view" id="v-ideas">
+    <div class="list">
+      <button class="btn sm fold" id="fold" aria-label="Collapse ideas list" title="Collapse / expand ideas">⟨</button>
+      <div class="head"><b><span class="grad-text" id="ideaCount">10</span> ideas</b><div class="small mute" id="ideasMeta"></div><div class="listbar" id="listbar"></div><div id="banner"></div></div>
+      <div id="ideaList"></div>
+    </div>
+    <div class="detail" id="detail"></div>
+  </section>
+
+  <section class="view" id="v-news"><div class="inner">
+    <div class="card hero"><p class="eyebrow">Today's focus</p><div class="big" id="focus"></div><p class="mute small" id="summary" style="margin:10px 0 0"></p></div>
+    <div id="radarWrap"></div>
+    <div class="cols">
+      <div><p class="eyebrow">Top announcements</p><ol class="feed" id="ann"></ol></div>
+      <div><p class="eyebrow">Trending in your niche</p><ol class="feed" id="trend"></ol></div>
+    </div>
+  </div></section>
+
+  <section class="view" id="v-competitors"><div class="inner">
+    <div class="card hero">
+      <p class="eyebrow">Break down any Reel</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><input id="wurl" style="flex:1;min-width:240px" placeholder="Paste an Instagram Reel, YouTube Short or TikTok link"><button id="wbtn" class="btn hot">Break it down</button></div>
+    </div>
+    <div id="wout" class="card bd small" style="display:none;margin-bottom:16px"></div>
+    <p class="eyebrow">Competitor videos watched today</p><div id="watched" class="small"></div>
+  </div></section>
+
+  <section class="view" id="v-sprint"><div class="inner">
+    <div class="card hero">
+      <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;align-items:baseline"><div class="big">10 day sprint</div><span class="mute small" id="sprintmeta"></span></div>
+      <div class="sprint" id="sprint"></div>
+      <ol class="plan" id="plan"></ol>
+    </div>
+    <p class="eyebrow">Playbook</p><ul class="rules" id="rules"></ul>
+  </div></section>
+
+  <section class="view" id="v-results"><div class="inner">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px">
+      <div><p class="eyebrow" style="margin:0">Your Reels</p><div class="small mute" id="resMeta"></div><div class="small mute" id="resNote"></div></div>
+      <button class="btn" id="statsBtn">Refresh stats</button>
+    </div>
+    <div class="statgrid" id="resStats"></div>
+    <div class="card"><table class="res" id="resTable"></table></div>
+  </div></section>
+
+  <section class="view" id="v-guides"><div class="inner">
+    <p class="eyebrow">DM guides</p>
+    <p class="small mute" style="margin-top:-4px">Each guide is a PDF in your style, also saved to Downloads. Share it to Google Drive once, then <b>Copy DM + link</b> when someone comments the keyword. Make one from any idea with <b>Draft guide</b> (or press <kbd>g</kbd>).</p>
+    <div id="guideList"></div>
+  </div></section>
+
+  <section class="view" id="v-runs"><div class="inner">
+    <div class="statgrid" id="stats"></div>
+    <p class="eyebrow">Sources today</p><div id="platforms" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px"></div><p class="small mute" id="perrors" style="margin:0 0 18px"></p>
+    <p class="eyebrow">Claude usage</p><div class="card small" id="usageBox" style="margin-bottom:18px"></div>
+    <p class="eyebrow">8 AM scheduled run</p><div class="log" id="slog" style="margin-bottom:18px;max-height:200px">No scheduled run logged yet.</div>
+    <p class="eyebrow">Last Run now log</p><div class="log" id="log">No run yet since the dashboard started.</div>
+  </div></section>
+</main>
+<footer class="credit">Created by <a href="https://github.com/AryamanSi17" target="_blank" rel="noopener">AryamanSi17</a> · <a href="https://github.com/AryamanSi17/content-desk" target="_blank" rel="noopener">GitHub</a> · <a href="https://www.instagram.com/ai_aryaman/" target="_blank" rel="noopener">Instagram @ai_aryaman</a></footer>
+
+<dialog id="pdfView"><div class="pv-bar"><b id="pvTitle"></b><div id="pvActions" class="actions" style="margin:0"></div><button class="btn sm" id="pvClose" aria-label="Close">✕</button></div><iframe id="pvFrame" title="Guide PDF"></iframe></dialog>
+<div id="prompter">
+  <div class="bar"><b style="color:#fff" id="ptitle"></b><span style="margin-left:auto">Space: play/pause · ↑↓ speed · Esc: close</span><button class="btn sm" id="pplay">Play</button><button class="btn sm" id="pclose">Close</button></div>
+  <div id="ptext"></div><div class="guide"></div>
+</div>
+<div class="hint">Ideas: <kbd>↑</kbd><kbd>↓</kbd> move · <kbd>c</kbd> copy · <kbd>t</kbd> teleprompter · <kbd>r</kbd> recorded · <kbd>g</kbd> guide · <kbd>h</kbd> hooks · <kbd>p</kbd> posted</div>
+<div class="toast" id="toast"><i>✓</i><span></span></div>
+
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const safeUrl = u => /^https?:\/\//.test(u || "") ? esc(u) : "#";
+const link = (u, t, cls = "") => `<a class="${cls}" href="${safeUrl(u)}" target="_blank" rel="noopener">${esc(t)}</a>`;
+const api = (p, body) => fetch(p, body ? {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(body)} : {}).then(async r => { const j = await r.json(); if (!r.ok) throw new Error(j.error || r.status); return j; });
+const todayISO = () => new Date().toLocaleDateString("en-CA");
+const EYE = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>`;
+
+function toast(msg, undo) {
+  const t = $("toast"); t.querySelector("span").textContent = msg;
+  t.querySelector("button")?.remove();
+  if (undo) { const b = document.createElement("button"); b.textContent = "Undo"; b.onclick = () => { t.classList.remove("on"); undo(); }; t.appendChild(b); }
+  t.classList.add("on"); clearTimeout(toast.h); toast.h = setTimeout(() => t.classList.remove("on"), undo ? 5000 : 1600);
+}
+
+// Follows the system theme; the toggle overrides it (per viewer convenience only)
+try { const t = localStorage.getItem("theme"); if (t) document.documentElement.dataset.theme = t; } catch {}
+$("theme").onclick = () => { const r = document.documentElement; const dark = r.dataset.theme ? r.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches; r.dataset.theme = dark ? "light" : "dark"; try { localStorage.setItem("theme", r.dataset.theme); } catch {} };
+
+function route() {
+  const tab = location.hash.slice(1) || "ideas";
+  document.querySelectorAll(".view").forEach(v => v.classList.toggle("on", v.id === "v-" + tab));
+  let on = null;
+  document.querySelectorAll("#tabs a").forEach(a => { const m = a.getAttribute("href") === "#" + tab; a.classList.toggle("on", m); if (m) on = a; });
+  if (on) Object.assign($("pill").style, {left: on.offsetLeft + "px", width: on.offsetWidth + "px"});
+}
+addEventListener("hashchange", route); addEventListener("resize", route);
+
+const PLAN = [
+  "Fix the profile: bio = one promise (\"Daily AI tools and GitHub repos you can use today\"). Pin your 3 best Reels. Set up keyword DMs so 'comment X' answers in seconds. Post 2 ideas.",
+  "Post 2 Reels: one news, one repo. Reply to every comment in the first hour.",
+  "Make 1 carousel (\"5 Claude skills to install this week\"). Carousels get saves, saves push reach.",
+  "Use Trial Reels for one experiment: same script, a new hook. Keep the winner.",
+  "Ask one creator from sources.md for a collab post.",
+  "Check Insights: best 3 second hold and most shares? Repeat that format all week.",
+  "Start a named series (\"Repo of the day #1\").",
+  "Another carousel or a side-by-side comparison.",
+  "Story Q&A from DMs, then turn the best question into a Reel.",
+  "Review all 10 days: top 3 hooks, top 3 topics. Plan next week from what won."
+];
+const RULES = [
+  ["1.5s", "Say the hook and show the cover text in the first 1.5 seconds. Most people watch with the sound off."],
+  ["3s", "Show proof by second 3: the repo page, the star count, or the output."],
+  ["35-50s", "Aim for 35 to 50 seconds. Cut the setup part first."],
+  ["Same day", "Fresh news beats evergreen. Post launch-day content the same day."],
+  ["Big name", "Big brand + big number + open source usually wins. Your own best Reels in content-profile.md show your formula."],
+  ["Same time", "Post at the same time every day. Check Insights for when your followers are online."],
+  ["Instant DM", "Keep the comment-keyword CTA. Make the DM land instantly."],
+  ["2 a day", "2 Reels a day for 10 days beats 1 perfect Reel. Volume finds the hit."]
+];
+
+let cur = null, prog = {start: todayISO(), done: {}}, sel = 0;
+let stats = {reels: [], history: {}}, guides = [], carousels = [], hookCache = {}, swap = {};
+const fmtN = n => n >= 1e6 ? (n / 1e6).toFixed(1) + "M" : n >= 1e3 ? (n / 1e3).toFixed(1).replace(".0", "") + "k" : String(n);
+const kwOf = i => String(i.cta_keyword || "").toLowerCase().replace(/\W/g, "");
+const postedFor = i => stats.reels.find(r => r.keyword && r.keyword === kwOf(i));
+const carouselNow = () => carousels.find(c => c.date === cur.date && c.n === sel);
+const guideFor = i => guides.find(g => g.keyword === kwOf(i));
+// Session-only hook swap: never edits the saved digest
+const view = i => { const h = swap[key(cur.ideas.indexOf(i))]; if (!h) return i;
+  return {...i, cover_text: h.cover_text, script: [{...i.script[0], say: h.say}, ...i.script.slice(1)]}; };
+
+async function loadDates(pick) {
+  const dates = await api("/api/digests");
+  $("date").innerHTML = dates.map(d => `<option>${esc(d)}</option>`).join("");
+  if (pick && dates.includes(pick)) $("date").value = pick;
+  if (dates.length) await load($("date").value);
+  else { $("ideaList").innerHTML = ""; $("detail").innerHTML = `<div class="empty">No digest yet. Press <b>Run now</b>.</div>`; }
+}
+
+async function load(d) {
+  cur = await api("/api/digest?date=" + d);
+  sel = 0;
+  Object.entries(await api("/api/hooks?date=" + d).catch(() => ({}))).forEach(([n, h]) => { hookCache[key(n)] = h; });
+  const gen = new Date(cur.generated_at), hrs = Math.round((Date.now() - gen) / 36e5);
+  $("ideaCount").textContent = cur.ideas.length;
+  $("ideasMeta").textContent = `for ${new Date(cur.date + "T00:00:00").toLocaleDateString([], {weekday:"long", day:"numeric", month:"long"})} · made ${gen.toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"})}`;
+  const off = Object.entries(cur.platforms || {}).filter(([k, v]) => v.status !== "ok" && (k === "x" || k === "instagram")).map(([k]) => k === "x" ? "X" : "Instagram");
+  let b = "";
+  if (cur.date !== todayISO()) b += `<div class="banner stale">This is the digest for <b>${esc(cur.date)}</b>, not today. Press <b>Run now</b>.</div>`;
+  else if (hrs >= 6) b += `<div class="banner">Made <b>${hrs}h ago</b>. Press Run now for the latest.</div>`;
+  if (off.length) b += `<div class="banner"><b>${off.join(" and ")}</b> not connected today. <a href="#runs">Details</a></div>`;
+  $("banner").innerHTML = b;
+  $("focus").textContent = cur.today_focus || "";
+  $("summary").textContent = cur.summary || "";
+  $("radarWrap").innerHTML = (cur.radar || []).length ? `<p class="eyebrow">Trend radar</p><div class="radar">${cur.radar.map(r =>
+    `<div class="rd" title="${esc(r.note)}"><b>${esc(r.topic)}</b><span class="heat">${"🔥".repeat(Math.max(1, Math.min(5, +r.heat || 1)))}</span> <span class="mute small">${esc((r.platforms || []).join(" · "))}</span></div>`).join("")}</div>` : "";
+  $("ann").innerHTML = (cur.announcements || []).map(a => `<li>${link(a.url, a.title)} <span class="chip">${esc(a.source)}</span><div class="why2">${esc(a.why_it_matters)}</div></li>`).join("");
+  $("trend").innerHTML = (cur.trending || []).map(t => `<li>${link(t.url, t.title)} <span class="chip">${esc(t.platform)}</span><div class="hook"><b class="grad-text">Hook</b> ${esc(t.hook)}</div><div class="why2">${esc(t.why_it_worked)}</div></li>`).join("");
+  const P = cur.platforms || {}, okN = Object.values(P).filter(v => v.status === "ok").length, total = Object.values(P).reduce((s, v) => s + v.count, 0);
+  $("stats").innerHTML = [[`${okN}/${Object.keys(P).length}`, "sources working"], [total, "posts read today"], [(cur.watched || []).length, "competitor videos watched"], [(cur.unverified_links || []).length, "unverified links"]]
+    .map(([n, l]) => `<div class="stat"><b>${esc(n)}</b><span>${esc(l)}</span></div>`).join("");
+  $("platforms").innerHTML = Object.entries(P).map(([k, v]) => `<span class="chip ${esc(v.status)}">${esc(k)} · ${v.count}</span>`).join("");
+  $("perrors").innerHTML = Object.entries(P).filter(([, v]) => v.status !== "ok").map(([k, v]) => `<b>${esc(k)}:</b> ${esc(v.error)}`).join("<br>");
+  $("watched").innerHTML = (cur.watched || []).length ? `<ol class="feed">${cur.watched.map(w => `<li>${link(w.url, w.title || w.url)} <span class="chip">${esc(w.duration)}</span></li>`).join("")}</ol>`
+    : `<p class="mute">None today. You can paste any Reel above.</p>`;
+  renderList(); renderDetail(); renderSprint();
+}
+
+const key = n => `${cur.date}#${n}`;
+const imgsOf = i => (i.images || []).filter(m => /^\/img\/[\w.-]+$/.test(m.src));
+
+// Posted = ticked by him, or found on his profile by its comment keyword (Results tab).
+let showPosted = false;
+const isPosted = i => !!(prog.posted || {})[i.title] || !!postedFor(i);
+const visible = () => cur.ideas.map((i, n) => n).filter(n => showPosted || !isPosted(cur.ideas[n]));
+function fixSel() { const v = visible(); if (v.length && !v.includes(sel)) sel = v[0]; }
+
+function renderList() {
+  fixSel();
+  const v = visible(), postedN = cur.ideas.filter(isPosted).length;
+  $("ideaCount").textContent = cur.ideas.length - postedN;
+  $("listbar").innerHTML = postedN ? `<span>${postedN} posted ✓</span><button id="togglePosted">${showPosted ? "Hide posted" : "Show posted"}</button>` : `<span>Tick ○ when you post one</span>`;
+  if (!v.length) { $("ideaList").innerHTML = `<div class="alldone">🎉 All ${cur.ideas.length} ideas posted.<br>Press <b>Run now</b> for fresh ones.</div>`; $("detail").innerHTML = ""; return; }
+  $("ideaList").innerHTML = v.map(n => {
+    const i = cur.ideas[n], im = imgsOf(i), bg = im.find(m => m.label !== "GitHub repo card") || im[0], done = prog.done[key(n)], po = isPosted(i);
+    return `<div title="${esc(i.title)}" class="item ${n === sel ? "sel" : ""} ${done ? "done" : ""} ${po ? "isposted" : ""}" data-n="${n}">
+      <button class="chk" data-post="${n}" title="${po ? "Posted. Click to undo" : "Mark as posted"}" aria-label="Mark as posted">✓</button>
+      <div class="ring" style="--p:${(+i.score || 0) * 10}"><span>${esc(i.score)}</span></div>
+      <div class="txt" style="flex:1;min-width:0"><div class="t">${esc(i.title)}</div><div class="m">${postedFor(i) ? `<span class="posted">posted · ${fmtN(postedFor(i).plays)} plays</span> · ` : ""}${done ? `<span class="tick">✓ recorded</span> · ` : ""}${esc(i.urgency)}${i.news_date ? " · " + esc(i.news_date.slice(5)) : ""}${hookCache[key(n)] ? ` · <span class="badge">⚡ ${hookCache[key(n)].hooks.length} hooks</span>` : ""}${guideFor(i) ? ` · <span class="badge">📄 guide</span>` : ""}</div></div>
+      ${bg ? `<div class="thumb" style="background-image:url('${esc(bg.src)}')"></div>` : ""}
+    </div>`;
+  }).join("");
+}
+async function setPosted(n, posted, unrecord = false) {
+  const i = cur.ideas[n];
+  prog = await api("/api/posted", {title: i.title, posted});
+  // Posting it means it was recorded too, so the sprint counts it. Undo removes that auto-mark again.
+  const autoRecorded = posted && !prog.done[key(n)];
+  if (autoRecorded || unrecord) prog = await api("/api/progress", {key: key(n), done: autoRecorded});
+  renderList(); renderDetail(); renderSprint();
+  if (posted) toast(`Posted ✓ "${i.title.slice(0, 40)}"`, () => setPosted(n, false, autoRecorded));
+}
+$("listbar").onclick = e => { if (e.target.id === "togglePosted") { showPosted = !showPosted; renderList(); renderDetail(); } };
+$("ideaList").onclick = e => {
+  const c = e.target.closest(".chk");
+  if (c) { e.stopPropagation(); const n = +c.dataset.post, po = isPosted(cur.ideas[n]);
+    if (!po && !showPosted) { c.closest(".item").classList.add("leaving"); setTimeout(() => setPosted(n, true), 280); } else setPosted(n, !po);
+    return; }
+  const it = e.target.closest(".item"); if (!it) return;
+  sel = +it.dataset.n; renderList(); renderDetail();
+  $("v-ideas").classList.add("show-detail"); resetScroll();
+};
+// Collapse the ideas list to just the score rings (remembered per browser).
+const setFold = on => { $("v-ideas").classList.toggle("folded", on); $("fold").textContent = on ? "⟩" : "⟨"; try { localStorage.setItem("foldIdeas", on ? "1" : ""); } catch {} };
+$("fold").onclick = () => setFold(!$("v-ideas").classList.contains("folded"));
+try { setFold(!!localStorage.getItem("foldIdeas")); } catch {}
+// Guide PDFs open in a viewer on top of the dashboard, never a new tab.
+const openPdf = g => { document.title = $("pvTitle").textContent = g.filename ? g.filename.replace(/\.pdf$/, "") : g.title;
+  $("pvActions").innerHTML = guideActions(g, "data-pv").replace(/<a class="btn sm" href="[^"]*\/guides\/[^"]*"[^>]*>📄 Open PDF<\/a>/, "");
+  if (!$("pdfView").open) { $("pvFrame").src = g.pdf + "#view=FitH"; $("pdfView").showModal(); } };
+document.addEventListener("click", e => {
+  const a = e.target.closest('a[href^="/guides/"]'); if (!a) return;
+  const g = guides.find(x => x.pdf === a.getAttribute("href")); if (!g) return;
+  e.preventDefault(); openPdf(g);
+});
+$("pvClose").onclick = () => $("pdfView").close();
+$("pdfView").addEventListener("close", () => { $("pvFrame").src = "about:blank"; document.title = "Content Desk"; });
+$("pvActions").onclick = e => { const b = e.target.closest("button[data-pv]"); if (!b) return;
+  b.dataset.pv === "share" ? shareGuide(b.dataset.kw, b) : copyDM(b.dataset.kw); };
+const resetScroll = () => { const p = $("scriptPane"); if (p) p.scrollTop = 0; $("detail").scrollTop = 0; };
+
+// CTA sentence ("Comment reverse for the guide") goes first, then the rest of the caption.
+const captionOf = i => { const parts = String(i.caption || "").match(/[^.!?]+[.!?]*/g) || [];
+  const cta = parts.filter(x => /\bcomment\b/i.test(x)), rest = parts.filter(x => !/\bcomment\b/i.test(x));
+  return [...cta, ...rest].map(x => x.trim()).join("\n"); };
+const captionText = i => `${captionOf(i)}\n\n${(i.hashtags || []).join(" ")}`;
+const wholeText = i => [
+  i.title.toUpperCase(), `Why now: ${i.why_now}`, `Cover text: ${i.cover_text}`, `Comment keyword: ${i.cta_keyword}    Length: ${i.length}`,
+  "", "SCRIPT", ...i.script.map(s => `\n[${s.part}]\nSAY: ${s.say}\nSHOW: ${s.show}`),
+  "", "SPOKEN ONLY (teleprompter)", i.script.map(s => s.say).join("\n\n"),
+  "", "CAPTION", captionText(i),
+  "", "LINKS", ...[i.repo_url, ...(i.source_urls || [])].filter(Boolean)
+].join("\n");
+const scriptText = i => i.script.map(s => s.say).join("\n\n");
+// Highlight the last word of the cover text like a real Reel cover
+const coverHTML = t => { const w = String(t || "").trim().split(/\s+/); const last = w.pop() || ""; return `${esc(w.join(" "))} <mark>${esc(last)}</mark>`; };
+
+function renderDetail() {
+  if (!cur.ideas[sel] || !visible().length) return;
+  const i = view(cur.ideas[sel]), hk = hookCache[key(sel)], g = guideFor(i), live = postedFor(i);
+  const done = prog.done[key(sel)], imgs = imgsOf(i), bg = imgs.find(m => m.label !== "GitHub repo card") || imgs[0];
+  $("detail").innerHTML = `
+    <button class="btn sm back" data-a="back">← All ideas</button>
+    <div class="dgrid">
+      <div class="left">
+        <div class="phone"><div class="screen" ${bg ? `style="background-image:linear-gradient(180deg,rgba(0,0,0,.2),rgba(0,0,0,.15) 40%,rgba(0,0,0,.8)),url('${esc(bg.src)}')"` : ""}>
+          <div class="top"><span>Reels</span><span>${esc(i.length)}</span></div>
+          <div class="txt">${coverHTML(i.cover_text)}</div>
+          <div class="side"><div>♡</div><div>💬</div><div>➤</div></div>
+          <div class="kw">💬 Comment "${esc(i.cta_keyword)}"</div>
+        </div></div>
+        <div class="shots">${imgs.map(m => `<a href="${safeUrl(m.link)}" target="_blank" rel="noopener" title="${esc(m.label)}: open source"><img src="${esc(m.src)}" alt="${esc(m.label)}" loading="lazy"><span>${esc(m.label)}</span></a>`).join("")}</div>
+        ${imgs.length ? "" : `<p class="small mute">No images for this idea.</p>`}
+      </div>
+      <div class="right" id="scriptPane">
+        <div class="meta"><span class="chip">Idea ${sel + 1} / ${cur.ideas.length}</span><span class="chip">${esc(i.profile_topic)}</span>${i.news_date ? `<span class="chip">news ${esc(i.news_date)}</span>` : ""}<span class="chip">${esc(i.urgency)}</span></div>
+        <div class="title-row">
+          <h3>${esc(i.title)}</h3>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn hot" data-a="whole"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>Copy whole script</button>
+            <button class="btn" data-a="hooks"${running("hooks") ? " disabled" : ""}>${running("hooks") ? "⚡ Writing hooks..." : "⚡ 5 more hooks"}</button>
+            ${g ? `<a class="btn" href="${esc(g.pdf)}" target="_blank" rel="noopener">📄 View guide</a>` : `<button class="btn" data-a="guide"${running("guide") ? " disabled" : ""}>${running("guide") ? "📄 Drafting..." : "📄 Draft guide"}</button>`}
+            <button class="btn" data-a="carousel"${running("carousel") ? " disabled" : ""}>${running("carousel") ? "🖼 Making..." : carouselNow() ? "🖼 View carousel" : "🖼 Make carousel"}</button>
+            <button class="btn" data-a="prompt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M8 21h8M12 18v3"/></svg>Teleprompter</button>
+          </div>
+        </div>
+        <div id="carPanel">${slot("carousel", carouselNow() ? carouselHTML(carouselNow()) : "")}</div>
+        <div id="guidePanel">${slot("guide", g ? guideHTML(g) : "")}</div>
+        <div class="why"><b>Why now:</b> ${esc(i.why_now)}${live ? `<br><b class="posted">Posted:</b> ${fmtN(live.plays)} plays · ${fmtN(live.likes)} likes · ${fmtN(live.comments)} comments · <a href="${safeUrl(live.url)}" target="_blank" rel="noopener">open Reel</a>` : ""}</div>
+        <div id="hookPanel">${slot("hooks", hk ? hooksHTML(hk) : "")}</div>
+        <div class="steps">${i.script.map((s, k) => `<div class="step"><div class="num">${k + 1}</div><div class="sbody"><div class="part">${esc(s.part)}</div><div class="say">${esc(s.say)}</div><div class="show">${EYE}<span>${esc(s.show)}</span></div></div></div>`).join("")}</div>
+        <div class="cap">${esc(captionOf(i))}\n\n<span class="tags">${esc((i.hashtags || []).join(" "))}</span></div>
+        <div class="actions">
+          <button class="btn sm" data-a="script">Copy script only</button>
+          <button class="btn sm" data-a="caption">Copy caption</button>
+          <button class="btn sm ${done ? "ok" : ""}" data-a="done">${done ? "✓ Recorded" : "Mark recorded"}</button>
+          <button class="btn sm ${isPosted(cur.ideas[sel]) ? "ok" : ""}" data-a="posted">${isPosted(cur.ideas[sel]) ? "✓ Posted" : "Mark posted"}</button>
+          <span style="flex:1"></span>
+          <button class="btn sm" data-a="prev" ${visible().indexOf(sel) <= 0 ? "disabled" : ""}>←</button><button class="btn sm" data-a="next" ${visible().indexOf(sel) === visible().length - 1 ? "disabled" : ""}>→</button>
+        </div>
+        <div class="links">${i.repo_url ? link(i.repo_url, "↗ Open repo") : ""}${(i.source_urls || []).map((u, k) => link(u, "↗ source " + (k + 1))).join("")}</div>
+      </div>
+    </div>`;
+}
+$("detail").onchange = e => {
+  if (e.target.id !== "hookSel") return;
+  const k = key(sel); swap[k] = hookCache[k].hooks[+e.target.value];  // -1 -> undefined = original hook
+  renderDetail(); renderList(); toast(swap[k] ? "Hook swapped in (this session only)" : "Back to the original hook");
+};
+$("detail").onclick = async e => {
+  const b = e.target.closest("button"); if (!b) return;
+  const i = view(cur.ideas[sel]), a = b.dataset.a;
+  if (a === "back") return $("v-ideas").classList.remove("show-detail");
+  if (a === "script" || a === "caption" || a === "whole") {
+    await navigator.clipboard.writeText(a === "whole" ? wholeText(i) : a === "script" ? scriptText(i) : captionText(i));
+    toast(a === "whole" ? "Whole script copied" : a === "script" ? "Spoken script copied" : "Caption copied");
+  } else if (a === "prompt") openPrompter(i);
+  else if (a === "hooks") loadHooks();
+  else if (a === "guide") makeGuide();
+  else if (a === "carousel") makeCarousel();
+  else if (a === "igpost") postCarousel();
+  else if (a === "copyhook") { await navigator.clipboard.writeText(hookCache[key(sel)].hooks[+b.dataset.h].say); toast("Hook copied"); }
+  else if (a === "share") shareGuide(b.dataset.kw, b);
+  else if (a === "copydm") copyDM(b.dataset.kw);
+  else if (a === "done") {
+    prog = await api("/api/progress", {key: key(sel), done: !prog.done[key(sel)]});
+    renderList(); renderDetail(); renderSprint();
+    if (prog.done[key(sel)]) toast("Nice. Marked as recorded");
+  } else if (a === "posted") setPosted(sel, !isPosted(cur.ideas[sel]));
+  else if (a === "prev" || a === "next") {
+    const v = visible(); sel = v[Math.max(0, Math.min(v.length - 1, v.indexOf(sel) + (a === "next" ? 1 : -1)))]; renderList(); renderDetail(); resetScroll();
+  }
+};
+addEventListener("keydown", e => {
+  if ($("prompter").classList.contains("on")) return;
+  if (!cur || !$("v-ideas").classList.contains("on") || e.target.matches("input,select")) return;
+  const v = visible(), at = v.indexOf(sel);
+  if (e.key === "ArrowDown" && at < v.length - 1) { sel = v[at + 1]; renderList(); renderDetail(); e.preventDefault(); }
+  if (e.key === "ArrowUp" && at > 0) { sel = v[at - 1]; renderList(); renderDetail(); e.preventDefault(); }
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  const act = {c: "whole", t: "prompt", r: "done", g: "guide", h: "hooks", p: "posted"}[e.key];
+  if (act) { const b = $("detail").querySelector(`button[data-a="${act}"]`); if (b) b.click(); }
+});
+
+// ---------- v2: hooks, guides, results ----------
+const hooksHTML = hk => {
+  const on = hk.hooks.indexOf(swap[key(sel)]), h = hk.hooks[on];
+  return `<div class="panel"><div class="eyebrow"><span>Hook lab · test these with Trial Reels</span></div>
+    <div class="hookpick"><select id="hookSel" aria-label="Pick a hook"><option value="-1">Original hook</option>${hk.hooks.map((x, k) =>
+      `<option value="${k}"${k === on ? " selected" : ""}>${esc(x.type)}: ${esc(x.cover_text)}</option>`).join("")}</select>
+    ${h ? `<button class="btn sm" data-a="copyhook" data-h="${on}">Copy</button>` : ""}</div>
+    ${h ? `<div class="hk on"><div class="ty">${esc(h.type)} · cover: ${esc(h.cover_text)}</div><div class="sy">${esc(h.say)}</div><div class="wy">${esc(h.why)}</div></div>`
+        : `<div class="small mute">Pick a hook to swap it into the script, cover and teleprompter.</div>`}</div>`;
+};
+const dmText = g => String(g.guide || "").replace("{LINK}", g.drive_link || "[share to Drive first]");
+const guideActions = (g, attr) => `${g.pdf ? `<a class="btn sm" href="${esc(g.pdf)}" target="_blank" rel="noopener">📄 Open PDF</a>` : ""}
+  ${g.pdf ? (g.drive_link ? `<a class="btn sm ok" href="${safeUrl(g.drive_link)}" target="_blank" rel="noopener">✓ On Drive ↗</a>` : `<button class="btn sm" ${attr}="share" data-kw="${esc(g.keyword)}">☁ Share to Google Drive</button>`) : ""}
+  <button class="btn sm hot" ${attr}="copydm" data-kw="${esc(g.keyword)}">Copy DM${g.drive_link ? " + link" : ""}</button>`;
+const guideHTML = g => `<div class="panel"><div class="eyebrow"><span>Guide for "${esc(g.keyword)}"${g.downloads ? ` · saved to ${esc(g.downloads.split("/").slice(-2).join("/"))}` : ""}</span></div>
+  <div class="actions" style="margin:0 0 10px">${guideActions(g, "data-a")}</div>
+  <div class="small mute" style="margin-top:8px"><b>DM:</b> ${esc(dmText(g))}</div></div>`;
+async function shareGuide(kw, btn) {
+  btn.disabled = true; btn.textContent = "Uploading to Drive...";
+  try { const r = await api("/api/share", {keyword: kw}); guides = await api("/api/guides");
+    await navigator.clipboard.writeText(r.drive_link).catch(() => {}); renderDetail(); renderGuides(); if ($("pdfView").open) openPdf(guides.find(x => x.keyword === kw)); toast("On Google Drive. Link copied"); }
+  catch (e) { btn.disabled = false; btn.textContent = "☁ Share to Google Drive"; toast(e.message.slice(0, 120)); }
+}
+const copyDM = async kw => { await navigator.clipboard.writeText(dmText(guides.find(g => g.keyword === kw))); toast("DM copied"); };
+
+// Slow Claude jobs (hooks, guide): one at a time per idea, busy/error state survives re-renders.
+const jobs = {};  // "kind:idea key" -> {msg} while running, {err} after a failure
+const busyHTML = msg => `<div class="panel mute small"><span class="dot run" style="display:inline-block"></span> ${esc(msg)}</div>`;
+const errHTML = msg => `<div class="panel" style="color:var(--bad)">${esc(msg)}</div>`;
+const running = kind => !!jobs[`${kind}:${key(sel)}`]?.msg;
+const slot = (kind, html) => { const j = jobs[`${kind}:${key(sel)}`]; return j?.msg ? busyHTML(j.msg) : j?.err ? errHTML(j.err) : html; };
+async function job(kind, msg, fn) {
+  const k = `${kind}:${key(sel)}`;
+  if (jobs[k]?.msg) return toast("Still working on it, hang on");
+  jobs[k] = {msg}; renderDetail();
+  try { await fn(); delete jobs[k]; } catch (e) { jobs[k] = {err: e.message}; }
+  renderDetail(); renderList();
+}
+
+async function loadHooks() {
+  const k = key(sel), d = cur.date, n = String(sel);
+  if (!hookCache[k]) await job("hooks", "Writing 5 hooks... about 15 seconds", async () => { hookCache[k] = await api("/api/hooks", {date: d, n}); });
+  else renderDetail();
+  $("hookPanel").scrollIntoView({behavior: "smooth", block: "nearest"});
+}
+const carouselHTML = c => `<div class="panel"><div class="eyebrow"><span>Carousel · ${c.slides.length} slides · saved to ${esc(c.downloads.split("/").slice(-2).join("/"))}</span></div>
+  <div class="shots">${c.slides.map((u, k) => `<a href="${esc(u)}" target="_blank" rel="noopener"><img src="${esc(u)}" alt="Slide ${k + 1}" loading="lazy"><span>${k + 1}</span></a>`).join("")}</div>
+  <div class="actions" style="margin:8px 0 0"><button class="btn hot" data-a="igpost">📸 Post to Instagram</button></div>
+  <div class="small mute" style="white-space:pre-wrap;margin-top:8px">${esc(c.caption)}\n${esc((c.hashtags || []).join(" "))}</div></div>`;
+async function postCarousel() {
+  const c = carouselNow();
+  await navigator.clipboard.writeText(c.caption + "\n\n" + (c.hashtags || []).join(" ")).catch(() => {});
+  api("/api/carousel/open", {date: c.date, n: String(c.n)}).catch(() => {});
+  window.open("https://www.instagram.com/", "_blank", "noopener");
+  toast("Caption copied. Slides folder opened: click + on Instagram, drag the slides in, paste the caption");
+}
+async function makeCarousel() {
+  if (carouselNow()) return $("carPanel").scrollIntoView({behavior: "smooth", block: "nearest"});
+  const d = cur.date, n = String(sel);
+  await job("carousel", "Writing the slides and rendering PNGs... about 40 to 90 seconds", async () => {
+    await api("/api/carousel", {date: d, n}); carousels = await api("/api/carousels"); toast("Carousel ready, also saved to Downloads");
+  });
+}
+async function makeGuide() {
+  const g = guideFor(view(cur.ideas[sel]));
+  if (g) return openPdf(g);
+  const d = cur.date, n = String(sel);
+  await job("guide", "Reading the repo README, writing the guide and making the PDF... about 30 to 60 seconds", async () => {
+    await api("/api/guide", {date: d, n}); guides = await api("/api/guides"); renderGuides(); toast("Guide PDF ready, also saved to Downloads");
+  });
+}
+function renderGuides() {
+  $("guideList").innerHTML = guides.length ? guides.map(g => `<div class="card gcard"><div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap">
+    <div><span class="kw">comment "${esc(g.keyword)}"</span><div style="font-weight:600">${esc(g.title)}</div><div class="small mute">${esc(g.date)}${g.repo ? " · " + link(g.repo, "repo") : ""}${g.downloads ? " · " + esc(g.downloads.split("/").pop()) : ""}</div></div>
+    <div class="actions" style="margin:0">${guideActions(g, "data-ga")}</div></div><div class="small mute" style="margin-top:8px"><b>DM:</b> ${esc(dmText(g))}</div></div>`).join("")
+    : `<div class="empty">No guides yet. Open an idea and press <b>Draft guide</b>.</div>`;
+}
+$("guideList").onclick = e => { const b = e.target.closest("button[data-ga]"); if (!b) return;
+  if (b.dataset.ga === "share") shareGuide(b.dataset.kw, b); else copyDM(b.dataset.kw); };
+
+async function renderUsage() {
+  const rows = await api("/api/usage").catch(() => []);
+  const tok = r => r.input + r.cache_read + r.cache_write + r.output;
+  const last = [...rows].reverse().find(r => r.kind === "digest"), today = rows.filter(r => r.at.startsWith(todayISO()));
+  $("usageBox").innerHTML = rows.length ? `<div class="statgrid" style="margin:0 0 10px">
+    <div class="stat"><b>${last ? fmtN(tok(last)) : "–"}</b><span>tokens, last Run now</span></div>
+    <div class="stat"><b>${last ? "$" + last.cost_usd : "–"}</b><span>API-equivalent cost, last run</span></div>
+    <div class="stat"><b>${fmtN(today.reduce((s, r) => s + tok(r), 0))}</b><span>tokens today (${today.length} calls)</span></div>
+    <div class="stat"><b>$${today.reduce((s, r) => s + r.cost_usd, 0).toFixed(2)}</b><span>API-equivalent today</span></div></div>
+    <span class="mute">Your plan's exact 5-hour and weekly % is in Claude Code: type <b>/usage</b>. Check it before and after one Run now to see your real share.</span>`
+    : `<span class="mute">No Claude calls logged yet. Numbers appear after the next Run now, guide or hooks.</span>`;
+}
+
+function renderResults() {
+  const R = [...stats.reels].filter(r => r.url).sort((a, b) => b.plays - a.plays), max = R[0]?.plays || 1;
+  const H = stats.history || {}, dates = [...new Set(Object.values(H).flatMap(Object.keys))].sort(), prev = dates[dates.length - 2];
+  const total = R.reduce((s, r) => s + r.plays, 0), recent = [...stats.reels].slice(0, 10);
+  $("resMeta").textContent = stats.updated ? `Updated ${new Date(stats.updated).toLocaleString([], {day: "numeric", month: "short", hour: "2-digit", minute: "2-digit"})} · ${R.length} Reels` : "No stats yet. Press Refresh stats.";
+  $("resStats").innerHTML = [[fmtN(total), "total plays"], [fmtN(Math.round(recent.reduce((s, r) => s + r.plays, 0) / (recent.length || 1))), "avg plays, last 10"],
+    [R[0] ? fmtN(R[0].plays) : "0", "best Reel"], [Object.keys(prog.done).length + " / 20", "sprint Reels recorded"]]
+    .map(([n, l]) => `<div class="stat"><b>${esc(n)}</b><span>${esc(l)}</span></div>`).join("");
+  $("resTable").innerHTML = `<tr><th>#</th><th>Plays</th><th style="width:30%"></th><th>Likes</th><th>Comments</th><th>Keyword</th><th>Reel</th></tr>` +
+    R.map((r, k) => { const before = prev && H[r.url] ? H[r.url][prev] : null, d = before != null ? r.plays - before : 0;
+      return `<tr><td class="mute">${k + 1}</td><td class="n">${fmtN(r.plays)} ${d > 0 ? `<span class="up">+${fmtN(d)}</span>` : ""}</td>
+        <td><div class="bar" style="width:${Math.round(r.plays / max * 100)}%"></div></td><td>${r.likes ? fmtN(r.likes) : "–"}</td><td>${r.comments ? fmtN(r.comments) : "–"}</td>
+        <td>${r.keyword ? `<span class="chip">${esc(r.keyword)}</span>` : ""}</td><td>${link(r.url, (r.caption || r.url.split("/reel/")[1] || "").slice(0, 40) + " ↗")}</td></tr>`; }).join("");
+}
+$("statsBtn").onclick = async () => {
+  const b = $("statsBtn"), note = $("resNote"); b.disabled = true; b.textContent = "Reading Instagram... (about 20s)";
+  note.className = "small mute"; note.textContent = "Opening your Reels page in Chrome and reading the numbers. Keep Chrome open.";
+  const ctl = new AbortController(), timer = setTimeout(() => ctl.abort(), 160000);  // never spin forever
+  try {
+    const r = await fetch("/api/stats", {method: "POST", headers: {"Content-Type": "application/json"}, body: "{}", signal: ctl.signal});
+    const j = await r.json(); if (!r.ok) throw new Error(j.error || r.status);
+    stats = await api("/api/stats"); renderResults(); renderList();
+    note.textContent = j.source === "grid" ? `Updated ${j.count} Reels. Instagram only showed plays this time (likes and comments are hidden when it rate limits), so those show as –.` : `Updated ${j.count} Reels with plays, likes and comments.`;
+    toast("Stats updated");
+  } catch (e) {
+    note.className = "small"; note.style.color = "var(--bad)";
+    note.textContent = e.name === "AbortError" ? "No answer after 2.5 minutes. Check Chrome is open and the OpenCLI extension is on, then try again." : e.message;
+  }
+  clearTimeout(timer); b.disabled = false; b.textContent = "Refresh stats";
+};
+
+// ---------- teleprompter ----------
+const P = {speed: 1.2, playing: false, raf: 0};
+function openPrompter(i) {
+  $("ptitle").textContent = i.title;
+  $("ptext").innerHTML = i.script.map(s => `<p><span>${esc(s.part)}</span>${esc(s.say)}</p>`).join("");
+  $("prompter").classList.add("on"); $("ptext").scrollTop = 0; P.playing = false; $("pplay").textContent = "Play";
+}
+function tick() { if (!P.playing) return; $("ptext").scrollTop += P.speed; P.raf = requestAnimationFrame(tick); }
+function togglePlay() { P.playing = !P.playing; $("pplay").textContent = P.playing ? "Pause" : "Play"; if (P.playing) tick(); }
+function closePrompter() { P.playing = false; $("prompter").classList.remove("on"); }
+$("pplay").onclick = togglePlay; $("pclose").onclick = closePrompter;
+addEventListener("keydown", e => {
+  if (!$("prompter").classList.contains("on")) return;
+  if (e.key === " ") { togglePlay(); e.preventDefault(); }
+  if (e.key === "Escape") closePrompter();
+  if (e.key === "ArrowUp") { P.speed = Math.min(5, P.speed + .3); e.preventDefault(); }
+  if (e.key === "ArrowDown") { P.speed = Math.max(.3, P.speed - .3); e.preventDefault(); }
+});
+
+function renderSprint() {
+  const start = new Date(prog.start + "T00:00:00"), today = new Date(); today.setHours(0, 0, 0, 0);
+  const dayN = Math.min(10, Math.max(1, Math.round((today - start) / 864e5) + 1));
+  const per = Array(10).fill(0);
+  Object.keys(prog.done).forEach(k => { const n = Math.round((new Date(k.slice(0, 10) + "T00:00:00") - start) / 864e5); if (n >= 0 && n < 10) per[n]++; });
+  $("sprint").innerHTML = per.map((c, k) => `<div class="day ${c ? "hit" : ""} ${k + 1 === dayN ? "today" : ""}" title="${c} recorded">${k + 1}${c ? `<small>${c} ✓</small>` : ""}</div>`).join("");
+  $("sprintmeta").innerHTML = `Day <b>${dayN}</b> of 10 · <b>${Object.keys(prog.done).length}</b> / 20 Reels recorded`;
+  $("plan").innerHTML = PLAN.map((p, k) => `<li class="${k + 1 === dayN ? "cur" : ""}">${esc(p)}</li>`).join("");
+}
+
+async function poll() {
+  const s = await api("/api/status");
+  if (s.log.length) $("log").textContent = s.log.join("\n");
+  if ((s.scheduled_log || []).length) $("slog").textContent = s.scheduled_log.join("\n");
+  $("log").scrollTop = 1e9;
+  $("run").disabled = s.running;
+  $("run").classList.toggle("running", s.running);
+  $("run").querySelector("span").textContent = s.running ? "Running..." : "Run now";
+  $("status").innerHTML = s.running ? `<span class="dot run"></span>Reading X, Instagram, GitHub... about 5 min`
+    : s.exit === 0 ? `<span class="dot"></span>Updated` : s.exit ? `<span class="dot" style="background:var(--bad)"></span>Run failed, see Sources & runs` : `<span class="dot"></span>Live`;
+  if (s.running) setTimeout(poll, 2500);
+  else if (s.exit === 0 && poll.wasRunning) { await loadDates(todayISO()); renderUsage(); toast("Fresh ideas are in"); }
+  poll.wasRunning = s.running;
+}
+$("run").onclick = async () => { try { await api("/api/run", {}); } catch (e) { toast(e.message); } poll(); };
+
+$("wbtn").onclick = async () => {
+  const url = $("wurl").value.trim(); if (!url) return;
+  const out = $("wout"); out.style.display = "block";
+  $("wbtn").disabled = true; out.innerHTML = busyHTML("Downloading, transcribing and analysing. About 20 to 60 seconds...");
+  try {
+    const r = await api("/api/watch", {url});
+    out.innerHTML = `<p style="font:600 18px/1.4 'Space Grotesk'">“${esc(r.hook)}”</p><p><span class="chip">${esc(r.hook_type)}</span> <span class="chip">${esc(r.duration)}</span></p>
+      <p class="eyebrow" style="margin-top:14px">Structure</p><ol>${(r.structure || []).map(s => `<li>${esc(s)}</li>`).join("")}</ol>
+      <p><b>Why it works:</b> ${esc(r.why_it_works)}</p><p><b>Steal this:</b> ${esc(r.what_to_steal)}</p>
+      <p><b class="grad-text">Your version of the hook:</b> ${esc(r.my_version_hook)}</p><p><b>CTA:</b> ${esc(r.cta)}</p>
+      <details><summary class="mute">Transcript</summary><div class="log" style="margin-top:8px">${esc(r.transcript)}</div></details>`;
+  } catch (e) { out.innerHTML = errHTML(e.message); }
+  $("wbtn").disabled = false;
+};
+
+$("date").onchange = () => load($("date").value);
+$("rules").innerHTML = RULES.map(([n, r]) => `<li><b class="grad-text">${esc(n)}</b>${esc(r)}</li>`).join("");
+route();
+(async () => {
+  prog = await api("/api/progress");
+  [stats, guides, carousels] = await Promise.all([api("/api/stats").catch(() => stats), api("/api/guides").catch(() => []), api("/api/carousels").catch(() => [])]);
+  await loadDates(); renderResults(); renderGuides(); renderUsage(); poll(); route();
+})();
+</script>
+</body>
+</html>

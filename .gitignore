@@ -1,0 +1,10 @@
+data/
+*.env
+__pycache__/
+.DS_Store
+videos/
+
+# Each creator's own files (copy from templates/)
+/content-profile.md
+/style-samples.md
+/sources.md
