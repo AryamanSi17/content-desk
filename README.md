@@ -81,3 +81,9 @@ Everything the app makes (digests, guides, stats) goes in `data/`, which is git-
 ## License
 
 MIT, see [LICENSE](LICENSE). Made by [AryamanSi17](https://github.com/AryamanSi17). If it helps you, follow [@ai_aryaman](https://www.instagram.com/ai_aryaman/) on Instagram.
+
+## Support
+
+This project is free and open source. If it saved you time, you can [buy me a coffee on Ko-fi](https://ko-fi.com/aryamansinha).
+
+[![Support on Ko-fi](https://img.shields.io/badge/Ko--fi-Buy%20me%20a%20coffee-F2B826?logo=ko-fi&logoColor=white)](https://ko-fi.com/aryamansinha)
